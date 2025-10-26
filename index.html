@@ -169,83 +169,166 @@
             ];
           }
         } else {
-          // Mocniny úroveň - pouze dokonalé čtverce
-          const perfectSquares = [4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225, 256, 289, 324, 361, 400];
+          // Mocniny úroveň - rozšířené typy příkladů
+          const perfectSquares = [4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225, 256, 289, 324, 361, 400, 625, 2500];
           const smallSquares = [4, 9, 16, 25, 36, 49, 64, 81, 100];
+          const decimalSquares = [0.49, 0.64, 0.81, 1.44, 1.69, 2.25, 2.56, 3.24, 3.61, 4.0];
           const pythagoreanTriples = [
             {a: 3, b: 4, c: 5}, {a: 5, b: 12, c: 13}, {a: 6, b: 8, c: 10}, 
             {a: 7, b: 24, c: 25}, {a: 8, b: 15, c: 17}, {a: 9, b: 12, c: 15}
           ];
           
-          const type = Math.floor(Math.random() * 5);
+          const type = Math.floor(Math.random() * 10);
           if (type === 0) {
-            // √a - b = c
-            const square = perfectSquares[Math.floor(Math.random() * perfectSquares.length)];
-            const sqrt_val = Math.sqrt(square);
-            eq.b = Math.floor(Math.random() * 5) + 1;
-            eq.c = sqrt_val - eq.b;
-            eq.x = square;
-            eq.text = `√${eq.x} - ${eq.b} = ${eq.c}`;
-            eq.steps = [
-              { text: eq.text, hl: false },
-              { text: `Přičti ${eq.b} k oběma stranám`, hl: false },
-              { text: `√${eq.x} = ${eq.c} + ${eq.b}`, hl: false },
-              { text: `√${eq.x} = ${sqrt_val}`, hl: false },
-              { text: `${eq.x} = ${sqrt_val}²`, hl: false },
-              { text: `${eq.x} = ${square}`, hl: true }
-            ];
-          } else if (type === 1) {
-            // √a × √b = ?
-            const square1 = smallSquares[Math.floor(Math.random() * smallSquares.length)];
-            const square2 = smallSquares[Math.floor(Math.random() * smallSquares.length)];
+            // √a - 2 × √b = ? (typ a)
+            const square1 = perfectSquares[Math.floor(Math.random() * perfectSquares.length)];
+            const square2 = perfectSquares[Math.floor(Math.random() * perfectSquares.length)];
             const sqrt1 = Math.sqrt(square1);
             const sqrt2 = Math.sqrt(square2);
-            eq.a = square1;
-            eq.b = square2;
-            eq.result = sqrt1 * sqrt2;
-            eq.text = `√${eq.a} × √${eq.b} = ?`;
+            eq.result = sqrt1 - 2 * sqrt2;
+            eq.text = `√${square1} - 2 × √${square2} = ?`;
             eq.steps = [
               { text: eq.text, hl: false },
-              { text: `√${eq.a} × √${eq.b} = √(${eq.a} × ${eq.b})`, hl: false },
-              { text: `√(${eq.a} × ${eq.b}) = √${eq.a * eq.b}`, hl: false },
-              { text: `√${eq.a * eq.b} = ${eq.result}`, hl: true }
+              { text: `√${square1} = ${sqrt1}`, hl: false },
+              { text: `√${square2} = ${sqrt2}`, hl: false },
+              { text: `2 × √${square2} = 2 × ${sqrt2} = ${2 * sqrt2}`, hl: false },
+              { text: `${sqrt1} - ${2 * sqrt2} = ${eq.result}`, hl: true }
+            ];
+          } else if (type === 1) {
+            // (−a,b)² - 2 × √c,d = ? (typ b)
+            const decimal = decimalSquares[Math.floor(Math.random() * decimalSquares.length)];
+            const sqrt_decimal = Math.sqrt(decimal);
+            const neg_num = -(Math.random() * 2 + 0.5).toFixed(1);
+            const neg_squared = (neg_num * neg_num).toFixed(2);
+            eq.result = (neg_squared - 2 * sqrt_decimal).toFixed(2);
+            eq.text = `(${neg_num})² - 2 × √${decimal} = ?`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `(${neg_num})² = ${neg_squared}`, hl: false },
+              { text: `√${decimal} = ${sqrt_decimal}`, hl: false },
+              { text: `2 × √${decimal} = 2 × ${sqrt_decimal} = ${(2 * sqrt_decimal).toFixed(1)}`, hl: false },
+              { text: `${neg_squared} - ${(2 * sqrt_decimal).toFixed(1)} = ${eq.result}`, hl: true }
             ];
           } else if (type === 2) {
-            // (√a + b)² = ?
+            // (√a × b + c²)² = ? (typ c)
             const square = smallSquares[Math.floor(Math.random() * smallSquares.length)];
             const sqrt_val = Math.sqrt(square);
-            eq.b = Math.floor(Math.random() * 5) + 1;
-            eq.a = square;
-            eq.sqrt_a = sqrt_val;
-            eq.result = (sqrt_val + eq.b) * (sqrt_val + eq.b);
-            eq.text = `(√${eq.a} + ${eq.b})² = ?`;
+            const mult = Math.floor(Math.random() * 5) + 3;
+            const square2 = Math.floor(Math.random() * 5) + 2;
+            const inner_result = sqrt_val * mult + square2 * square2;
+            eq.result = inner_result * inner_result;
+            eq.text = `(√${square} × ${mult} + ${square2}²)² = ?`;
             eq.steps = [
               { text: eq.text, hl: false },
-              { text: `√${eq.a} = ${sqrt_val}`, hl: false },
-              { text: `(${sqrt_val} + ${eq.b})²`, hl: false },
-              { text: `= ${sqrt_val}² + 2×${sqrt_val}×${eq.b} + ${eq.b}²`, hl: false },
-              { text: `= ${sqrt_val * sqrt_val} + ${2 * sqrt_val * eq.b} + ${eq.b * eq.b}`, hl: false },
-              { text: `= ${eq.result}`, hl: true }
+              { text: `√${square} = ${sqrt_val}`, hl: false },
+              { text: `${square2}² = ${square2 * square2}`, hl: false },
+              { text: `√${square} × ${mult} + ${square2}² = ${sqrt_val} × ${mult} + ${square2 * square2}`, hl: false },
+              { text: `= ${sqrt_val * mult} + ${square2 * square2} = ${inner_result}`, hl: false },
+              { text: `${inner_result}² = ${eq.result}`, hl: true }
             ];
           } else if (type === 3) {
-            // √(a² + b²) = ? - pouze pythagorejské trojice
-            const triple = pythagoreanTriples[Math.floor(Math.random() * pythagoreanTriples.length)];
-            eq.a = triple.a;
-            eq.b = triple.b;
-            eq.a_sq = eq.a * eq.a;
-            eq.b_sq = eq.b * eq.b;
-            eq.sum = eq.a_sq + eq.b_sq;
-            eq.result = triple.c;
-            eq.text = `√(${eq.a}² + ${eq.b}²) = ?`;
+            // √a / (−b)² = ? (typ e)
+            const square = smallSquares[Math.floor(Math.random() * smallSquares.length)];
+            const sqrt_val = Math.sqrt(square);
+            const neg_num = -(Math.floor(Math.random() * 4) + 2);
+            const neg_squared = neg_num * neg_num;
+            eq.result = sqrt_val / neg_squared;
+            eq.text = `√${square} / (${neg_num})² = ?`;
             eq.steps = [
               { text: eq.text, hl: false },
-              { text: `${eq.a}² = ${eq.a_sq}`, hl: false },
-              { text: `${eq.b}² = ${eq.b_sq}`, hl: false },
-              { text: `√(${eq.a_sq} + ${eq.b_sq}) = √${eq.sum}`, hl: false },
-              { text: `√${eq.sum} = ${eq.result}`, hl: true }
+              { text: `√${square} = ${sqrt_val}`, hl: false },
+              { text: `(${neg_num})² = ${neg_squared}`, hl: false },
+              { text: `${sqrt_val} / ${neg_squared} = ${eq.result}`, hl: true }
+            ];
+          } else if (type === 4) {
+            // √((a - b²) / c) = ? (typ f)
+            const a = Math.floor(Math.random() * 20) + 15;
+            const b = Math.floor(Math.random() * 4) + 2;
+            const c = Math.floor(Math.random() * 3) + 2;
+            const inner = (a - b * b) / c;
+            const sqrt_inner = Math.sqrt(inner);
+            eq.result = sqrt_inner;
+            eq.text = `√((${a} - ${b}²) / ${c}) = ?`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `${b}² = ${b * b}`, hl: false },
+              { text: `${a} - ${b * b} = ${a - b * b}`, hl: false },
+              { text: `(${a - b * b}) / ${c} = ${inner}`, hl: false },
+              { text: `√${inner} = ${sqrt_inner}`, hl: true }
+            ];
+          } else if (type === 5) {
+            // a × √(−b)² + √c² = ? (typ g)
+            const a = Math.floor(Math.random() * 3) + 2;
+            const b = Math.floor(Math.random() * 5) + 3;
+            const c = Math.floor(Math.random() * 8) + 3;
+            const neg_squared = b * b;
+            const sqrt_neg = Math.sqrt(neg_squared);
+            const c_squared = c * c;
+            const sqrt_c = Math.sqrt(c_squared);
+            eq.result = a * sqrt_neg + sqrt_c;
+            eq.text = `${a} × √(${-b})² + √${c}² = ?`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `(${-b})² = ${neg_squared}`, hl: false },
+              { text: `√${neg_squared} = ${sqrt_neg}`, hl: false },
+              { text: `${c}² = ${c_squared}`, hl: false },
+              { text: `√${c_squared} = ${sqrt_c}`, hl: false },
+              { text: `${a} × ${sqrt_neg} + ${sqrt_c} = ${a * sqrt_neg} + ${sqrt_c} = ${eq.result}`, hl: true }
+            ];
+          } else if (type === 6) {
+            // √a × √(b/c) × √(d/e) = ? (typ h)
+            const a = 5;
+            const b = 3;
+            const c = 5;
+            const d = 12;
+            const e = 25;
+            const sqrt_a = Math.sqrt(a);
+            const sqrt_bc = Math.sqrt(b/c);
+            const sqrt_de = Math.sqrt(d/e);
+            const result = sqrt_a * sqrt_bc * sqrt_de;
+            eq.result = Math.round(result * 10) / 10;
+            eq.text = `√${a} × √(${b}/${c}) × √(${d}/${e}) = ?`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `√(${b}/${c}) = √${b/c} = ${sqrt_bc.toFixed(2)}`, hl: false },
+              { text: `√(${d}/${e}) = √${d/e} = ${sqrt_de.toFixed(2)}`, hl: false },
+              { text: `√${a} × ${sqrt_bc.toFixed(2)} × ${sqrt_de.toFixed(2)}`, hl: false },
+              { text: `= ${sqrt_a.toFixed(2)} × ${sqrt_bc.toFixed(2)} × ${sqrt_de.toFixed(2)}`, hl: false },
+              { text: `= ${eq.result}`, hl: true }
+            ];
+          } else if (type === 7) {
+            // a × √x - b = c (rovnice typ a)
+            const a = Math.floor(Math.random() * 3) + 2;
+            const b = Math.floor(Math.random() * 5) + 2;
+            const c = Math.floor(Math.random() * 8) + 3;
+            const sqrt_x = (c + b) / a;
+            const x = sqrt_x * sqrt_x;
+            eq.x = x;
+            eq.text = `${a} × √x - ${b} = ${c}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Přičti ${b} k oběma stranám`, hl: false },
+              { text: `${a} × √x = ${c} + ${b} = ${c + b}`, hl: false },
+              { text: `Vyděl ${a}`, hl: false },
+              { text: `√x = ${c + b} / ${a} = ${sqrt_x}`, hl: false },
+              { text: `x = ${sqrt_x}² = ${x}`, hl: true }
+            ];
+          } else if (type === 8) {
+            // √(a - b) = c (rovnice typ b)
+            const c = Math.floor(Math.random() * 5) + 2;
+            const b = Math.floor(Math.random() * 5) + 2;
+            const a = c * c + b;
+            eq.a = a;
+            eq.text = `√(a - ${b}) = ${c}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Umocni obě strany na druhou`, hl: false },
+              { text: `a - ${b} = ${c}² = ${c * c}`, hl: false },
+              { text: `Přičti ${b}`, hl: false },
+              { text: `a = ${c * c} + ${b} = ${a}`, hl: true }
             ];
           } else {
-            // √a + √b = ?
+            // √a + √b = ? (původní typ)
             const square1 = smallSquares[Math.floor(Math.random() * smallSquares.length)];
             const square2 = smallSquares[Math.floor(Math.random() * smallSquares.length)];
             const sqrt1 = Math.sqrt(square1);
