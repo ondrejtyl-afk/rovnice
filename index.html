@@ -137,7 +137,7 @@
               { text: `x = ${eq.x}`, hl: true }
             ];
           }
-        } else {
+        } else if (level === 'hard') {
           const type = Math.floor(Math.random() * 2);
           if (type === 0) {
             eq.c1 = Math.floor(Math.random() * 5) + 2;
@@ -166,6 +166,101 @@
               { text: `${eq.sum}x = ${eq.b}`, hl: false },
               { text: `x = ${eq.b} ÷ ${eq.sum}`, hl: false },
               { text: `x = ${eq.x}`, hl: true }
+            ];
+          }
+        } else {
+          // Mocniny úroveň - pouze dokonalé čtverce
+          const perfectSquares = [4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144, 169, 196, 225, 256, 289, 324, 361, 400];
+          const smallSquares = [4, 9, 16, 25, 36, 49, 64, 81, 100];
+          const pythagoreanTriples = [
+            {a: 3, b: 4, c: 5}, {a: 5, b: 12, c: 13}, {a: 6, b: 8, c: 10}, 
+            {a: 7, b: 24, c: 25}, {a: 8, b: 15, c: 17}, {a: 9, b: 12, c: 15}
+          ];
+          
+          const type = Math.floor(Math.random() * 5);
+          if (type === 0) {
+            // √a - b = c
+            const square = perfectSquares[Math.floor(Math.random() * perfectSquares.length)];
+            const sqrt_val = Math.sqrt(square);
+            eq.b = Math.floor(Math.random() * 5) + 1;
+            eq.c = sqrt_val - eq.b;
+            eq.x = square;
+            eq.text = `√${eq.x} - ${eq.b} = ${eq.c}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Přičti ${eq.b} k oběma stranám`, hl: false },
+              { text: `√${eq.x} = ${eq.c} + ${eq.b}`, hl: false },
+              { text: `√${eq.x} = ${sqrt_val}`, hl: false },
+              { text: `${eq.x} = ${sqrt_val}²`, hl: false },
+              { text: `${eq.x} = ${square}`, hl: true }
+            ];
+          } else if (type === 1) {
+            // √a × √b = ?
+            const square1 = smallSquares[Math.floor(Math.random() * smallSquares.length)];
+            const square2 = smallSquares[Math.floor(Math.random() * smallSquares.length)];
+            const sqrt1 = Math.sqrt(square1);
+            const sqrt2 = Math.sqrt(square2);
+            eq.a = square1;
+            eq.b = square2;
+            eq.result = sqrt1 * sqrt2;
+            eq.text = `√${eq.a} × √${eq.b} = ?`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `√${eq.a} × √${eq.b} = √(${eq.a} × ${eq.b})`, hl: false },
+              { text: `√(${eq.a} × ${eq.b}) = √${eq.a * eq.b}`, hl: false },
+              { text: `√${eq.a * eq.b} = ${eq.result}`, hl: true }
+            ];
+          } else if (type === 2) {
+            // (√a + b)² = ?
+            const square = smallSquares[Math.floor(Math.random() * smallSquares.length)];
+            const sqrt_val = Math.sqrt(square);
+            eq.b = Math.floor(Math.random() * 5) + 1;
+            eq.a = square;
+            eq.sqrt_a = sqrt_val;
+            eq.result = (sqrt_val + eq.b) * (sqrt_val + eq.b);
+            eq.text = `(√${eq.a} + ${eq.b})² = ?`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `√${eq.a} = ${sqrt_val}`, hl: false },
+              { text: `(${sqrt_val} + ${eq.b})²`, hl: false },
+              { text: `= ${sqrt_val}² + 2×${sqrt_val}×${eq.b} + ${eq.b}²`, hl: false },
+              { text: `= ${sqrt_val * sqrt_val} + ${2 * sqrt_val * eq.b} + ${eq.b * eq.b}`, hl: false },
+              { text: `= ${eq.result}`, hl: true }
+            ];
+          } else if (type === 3) {
+            // √(a² + b²) = ? - pouze pythagorejské trojice
+            const triple = pythagoreanTriples[Math.floor(Math.random() * pythagoreanTriples.length)];
+            eq.a = triple.a;
+            eq.b = triple.b;
+            eq.a_sq = eq.a * eq.a;
+            eq.b_sq = eq.b * eq.b;
+            eq.sum = eq.a_sq + eq.b_sq;
+            eq.result = triple.c;
+            eq.text = `√(${eq.a}² + ${eq.b}²) = ?`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `${eq.a}² = ${eq.a_sq}`, hl: false },
+              { text: `${eq.b}² = ${eq.b_sq}`, hl: false },
+              { text: `√(${eq.a_sq} + ${eq.b_sq}) = √${eq.sum}`, hl: false },
+              { text: `√${eq.sum} = ${eq.result}`, hl: true }
+            ];
+          } else {
+            // √a + √b = ?
+            const square1 = smallSquares[Math.floor(Math.random() * smallSquares.length)];
+            const square2 = smallSquares[Math.floor(Math.random() * smallSquares.length)];
+            const sqrt1 = Math.sqrt(square1);
+            const sqrt2 = Math.sqrt(square2);
+            eq.a = square1;
+            eq.b = square2;
+            eq.sqrt_a = sqrt1;
+            eq.sqrt_b = sqrt2;
+            eq.result = sqrt1 + sqrt2;
+            eq.text = `√${eq.a} + √${eq.b} = ?`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `√${eq.a} = ${sqrt1}`, hl: false },
+              { text: `√${eq.b} = ${sqrt2}`, hl: false },
+              { text: `${sqrt1} + ${sqrt2} = ${eq.result}`, hl: true }
             ];
           }
         }
@@ -208,7 +303,8 @@
       const info = {
         easy: { e: '🟢', n: 'Snadné' },
         medium: { e: '🟡', n: 'Složitější' },
-        hard: { e: '🔴', n: 'Složité' }
+        hard: { e: '🔴', n: 'Složité' },
+        powers: { e: '⚡', n: 'Mocniny' }
       }[difficulty];
 
       return (
@@ -237,8 +333,13 @@
               <div className="bg-white rounded-3xl p-8 max-w-md mx-4">
                 <h2 className="text-3xl font-black text-gray-800 mb-6 text-center">Zvol obtížnost</h2>
                 <div className="space-y-4">
-                  {['easy', 'medium', 'hard'].map(d => {
-                    const inf = { easy: { e: '🟢', n: 'Snadné', t: 'Sčítání a odčítání' }, medium: { e: '🟡', n: 'Složitější', t: 'Všechny operace' }, hard: { e: '🔴', n: 'Složité', t: 'Více x' } }[d];
+                  {['easy', 'medium', 'hard', 'powers'].map(d => {
+                    const inf = { 
+                      easy: { e: '🟢', n: 'Snadné', t: 'Sčítání a odčítání' }, 
+                      medium: { e: '🟡', n: 'Složitější', t: 'Všechny operace' }, 
+                      hard: { e: '🔴', n: 'Složité', t: 'Více x' },
+                      powers: { e: '⚡', n: 'Mocniny', t: 'Odmocniny a mocniny' }
+                    }[d];
                     return (
                       <button
                         key={d}
