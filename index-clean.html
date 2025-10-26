@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#9333ea">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rovnice">
+  <title>Rovnice Trenažér</title>
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    body {
+      overscroll-behavior: none;
+      position: fixed;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #root {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    function App() {
+      const [difficulty, setDifficulty] = useState('easy');
+      const [equation, setEquation] = useState(null);
+      const [currentStep, setCurrentStep] = useState(0);
+      const [count, setCount] = useState(0);
+      const [showSettings, setShowSettings] = useState(false);
+      const [touchStart, setTouchStart] = useState(0);
+
+      const generateEq = (level) => {
+        const eq = {};
+        
+        if (level === 'easy') {
+          const isAdd = Math.random() > 0.5;
+          if (isAdd) {
+            eq.a = Math.floor(Math.random() * 10) + 1;
+            eq.x = Math.floor(Math.random() * 10) + 1;
+            eq.b = eq.x + eq.a;
+            eq.text = `x + ${eq.a} = ${eq.b}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Odečti ${eq.a} z obou stran`, hl: false },
+              { text: `x = ${eq.b} - ${eq.a}`, hl: false },
+              { text: `x = ${eq.x}`, hl: true }
+            ];
+          } else {
+            eq.x = Math.floor(Math.random() * 15) + 5;
+            eq.a = Math.floor(Math.random() * (eq.x - 1)) + 1;
+            eq.b = eq.x - eq.a;
+            eq.text = `x - ${eq.a} = ${eq.b}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Přičti ${eq.a} k oběma stranám`, hl: false },
+              { text: `x = ${eq.b} + ${eq.a}`, hl: false },
+              { text: `x = ${eq.x}`, hl: true }
+            ];
+          }
+        } else if (level === 'medium') {
+          const type = Math.floor(Math.random() * 4);
+          if (type === 0) {
+            eq.a = Math.floor(Math.random() * 50) + 10;
+            eq.x = Math.floor(Math.random() * 50) + 10;
+            eq.b = eq.x + eq.a;
+            eq.text = `x + ${eq.a} = ${eq.b}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Odečti ${eq.a}`, hl: false },
+              { text: `x = ${eq.b} - ${eq.a}`, hl: false },
+              { text: `x = ${eq.x}`, hl: true }
+            ];
+          } else if (type === 1) {
+            eq.x = Math.floor(Math.random() * 80) + 20;
+            eq.a = Math.floor(Math.random() * (eq.x - 10)) + 5;
+            eq.b = eq.x - eq.a;
+            eq.text = `x - ${eq.a} = ${eq.b}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Přičti ${eq.a}`, hl: false },
+              { text: `x = ${eq.b} + ${eq.a}`, hl: false },
+              { text: `x = ${eq.x}`, hl: true }
+            ];
+          } else if (type === 2) {
+            eq.a = Math.floor(Math.random() * 10) + 3;
+            eq.x = Math.floor(Math.random() * 15) + 2;
+            eq.b = eq.a * eq.x;
+            eq.text = `${eq.a}x = ${eq.b}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Vyděl ${eq.a}`, hl: false },
+              { text: `x = ${eq.b} ÷ ${eq.a}`, hl: false },
+              { text: `x = ${eq.x}`, hl: true }
+            ];
+          } else {
+            eq.a = Math.floor(Math.random() * 8) + 2;
+            eq.b = Math.floor(Math.random() * 15) + 2;
+            eq.x = eq.a * eq.b;
+            eq.text = `x / ${eq.a} = ${eq.b}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Vynásob ${eq.a}`, hl: false },
+              { text: `x = ${eq.b} × ${eq.a}`, hl: false },
+              { text: `x = ${eq.x}`, hl: true }
+            ];
+          }
+        } else {
+          const type = Math.floor(Math.random() * 2);
+          if (type === 0) {
+            eq.c1 = Math.floor(Math.random() * 5) + 2;
+            eq.c2 = Math.floor(Math.random() * 5) + 2;
+            eq.x = Math.floor(Math.random() * 10) + 1;
+            eq.sum = eq.c1 + eq.c2;
+            eq.b = eq.sum * eq.x;
+            eq.text = `${eq.c1}x + ${eq.c2}x = ${eq.b}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Sečti: ${eq.c1} + ${eq.c2} = ${eq.sum}`, hl: false },
+              { text: `${eq.sum}x = ${eq.b}`, hl: false },
+              { text: `x = ${eq.b} ÷ ${eq.sum}`, hl: false },
+              { text: `x = ${eq.x}`, hl: true }
+            ];
+          } else {
+            eq.c1 = Math.floor(Math.random() * 6) + 4;
+            eq.c2 = Math.floor(Math.random() * (eq.c1 - 1)) + 1;
+            eq.x = Math.floor(Math.random() * 10) + 1;
+            eq.sum = eq.c1 - eq.c2;
+            eq.b = eq.sum * eq.x;
+            eq.text = `${eq.c1}x - ${eq.c2}x = ${eq.b}`;
+            eq.steps = [
+              { text: eq.text, hl: false },
+              { text: `Odečti: ${eq.c1} - ${eq.c2} = ${eq.sum}`, hl: false },
+              { text: `${eq.sum}x = ${eq.b}`, hl: false },
+              { text: `x = ${eq.b} ÷ ${eq.sum}`, hl: false },
+              { text: `x = ${eq.x}`, hl: true }
+            ];
+          }
+        }
+        
+        return eq;
+      };
+
+      useEffect(() => {
+        setEquation(generateEq(difficulty));
+      }, [difficulty]);
+
+      const nextStep = () => {
+        if (currentStep < equation.steps.length) {
+          setCurrentStep(currentStep + 1);
+        }
+      };
+
+      const nextEq = () => {
+        setCurrentStep(0);
+        setCount(count + 1);
+        setEquation(generateEq(difficulty));
+      };
+
+      const handleTouch = (e) => {
+        const y = e.touches ? e.touches[0].clientY : 0;
+        if (!touchStart) {
+          setTouchStart(y);
+        } else {
+          const diff = touchStart - y;
+          if (diff > 50 && currentStep >= equation.steps.length) {
+            nextEq();
+            setTouchStart(0);
+          }
+        }
+      };
+
+      if (!equation) return null;
+
+      const done = currentStep >= equation.steps.length;
+      const info = {
+        easy: { e: '🟢', n: 'Snadné' },
+        medium: { e: '🟡', n: 'Složitější' },
+        hard: { e: '🔴', n: 'Složité' }
+      }[difficulty];
+
+      return (
+        <div
+          onTouchStart={handleTouch}
+          onTouchMove={handleTouch}
+          onTouchEnd={() => setTouchStart(0)}
+          className={`fixed inset-0 ${done ? 'bg-gradient-to-br from-green-400 to-emerald-600' : 'bg-gradient-to-br from-purple-500 to-pink-600'} transition-all duration-500`}
+        >
+          <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between text-white z-10">
+            <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full px-4 py-2">
+              <span className="text-2xl mr-2">🎯</span>
+              <span className="font-bold">{count}</span>
+            </div>
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full px-4 py-2"
+            >
+              <span className="text-2xl mr-2">{info.e}</span>
+              <span className="font-semibold">{info.n}</span>
+            </button>
+          </div>
+
+          {showSettings && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white rounded-3xl p-8 max-w-md mx-4">
+                <h2 className="text-3xl font-black text-gray-800 mb-6 text-center">Zvol obtížnost</h2>
+                <div className="space-y-4">
+                  {['easy', 'medium', 'hard'].map(d => {
+                    const inf = { easy: { e: '🟢', n: 'Snadné', t: 'Sčítání a odčítání' }, medium: { e: '🟡', n: 'Složitější', t: 'Všechny operace' }, hard: { e: '🔴', n: 'Složité', t: 'Více x' } }[d];
+                    return (
+                      <button
+                        key={d}
+                        onClick={() => { setDifficulty(d); setShowSettings(false); setCurrentStep(0); setCount(0); }}
+                        className={`w-full p-6 rounded-2xl font-bold text-xl ${difficulty === d ? 'bg-purple-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+                      >
+                        <div className="text-4xl mb-2">{inf.e}</div>
+                        {inf.n}
+                        <div className="text-sm font-normal mt-1 opacity-80">{inf.t}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+                <button onClick={() => setShowSettings(false)} className="w-full mt-6 p-4 bg-gray-200 rounded-2xl font-semibold">Zavřít</button>
+              </div>
+            </div>
+          )}
+
+          <div className="h-full flex flex-col items-center justify-center p-6">
+            <div className="text-center mb-12">
+              <div className="text-6xl md:text-7xl font-black text-white mb-4">{equation.text}</div>
+              <div className="text-xl text-white opacity-90">{currentStep === 0 ? 'Jak to vyřešit?' : 'Postup řešení'}</div>
+            </div>
+
+            {currentStep > 0 && (
+              <div className="w-full max-w-lg mb-8">
+                <div className="bg-white bg-opacity-20 backdrop-blur-md rounded-3xl p-6 space-y-3">
+                  {equation.steps.slice(0, currentStep).map((s, i) => (
+                    <div
+                      key={i}
+                      className={`text-white text-lg font-semibold ${s.hl ? 'bg-white bg-opacity-30 rounded-2xl p-4' : 'bg-white bg-opacity-10 rounded-xl p-3'}`}
+                      style={{ animation: 'slideIn 0.4s ease-out' }}
+                    >
+                      {s.hl && '✓ '}{s.text}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="w-full max-w-md">
+              {!done ? (
+                <button
+                  onClick={nextStep}
+                  className="w-full bg-white text-purple-600 font-black py-6 rounded-3xl text-2xl shadow-2xl active:scale-95 transition-transform"
+                >
+                  {currentStep === 0 ? '👉 ZOBRAZIT POSTUP' : '📝 DALŠÍ KROK'}
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={nextEq}
+                    className="w-full bg-white text-green-600 font-black py-6 rounded-3xl text-2xl shadow-2xl active:scale-95 transition-transform mb-4"
+                  >
+                    ✨ DALŠÍ PŘÍKLAD
+                  </button>
+                  <div className="text-center text-white text-sm opacity-80">↑ swipe nahoru</div>
+                </>
+              )}
+            </div>
+
+            {currentStep > 0 && !done && (
+              <div className="mt-4 text-white text-sm opacity-80">Krok {currentStep} / {equation.steps.length}</div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
